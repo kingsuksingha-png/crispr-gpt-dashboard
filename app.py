@@ -82,10 +82,11 @@ def landing_page():
         html.H2("Off-Target Effects Probabilities", style={'marginTop':'30px'}),
 
         # Gene links
-        html.Ul([
-            html.Li(html.A("A2M", href="/a2m", style={'textDecoration':'none', 'fontSize':'18px'})),
-            html.Li(html.A("ABCB1", href="/abcb1", style={'textDecoration':'none', 'fontSize':'18px'}))
-        ]),
+        # -------------
+html.Ul([
+    html.Li(dcc.Link("A2M", href="/a2m", style={'textDecoration':'none', 'fontSize':'18px'})),
+    html.Li(dcc.Link("ABCB1", href="/abcb1", style={'textDecoration':'none', 'fontSize':'18px'}))
+])
 
         html.Footer("Developed by Kingsuk Singha", style={'marginTop':'50px', 'textAlign':'center'})
     ])
