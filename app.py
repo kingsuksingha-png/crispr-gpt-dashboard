@@ -1,3 +1,4 @@
+# app.py
 import dash
 from dash import html, dcc
 from dash.dependencies import Input, Output
@@ -8,13 +9,13 @@ import numpy as np
 # -----------------------------
 # App Initialization
 # -----------------------------
-app = dash.Dash(__name__)
-server = app.server  # For deployment
+app = dash.Dash(__name__, suppress_callback_exceptions=True)
+server = app.server  # For Render deployment
 
 # -----------------------------
-# Load Data
+# Load CSV (should be in same repo as app.py)
 # -----------------------------
-df = pd.read_csv("/content/drive/MyDrive/A2M_ABCB1_extracted.csv")
+df = pd.read_csv("A2M_ABCB1_extracted.csv")
 df.columns = df.columns.str.strip()  # Remove extra spaces
 
 A2M_values = df["A2M (2)"].dropna().values
@@ -43,11 +44,11 @@ gene_categories = {
 }
 
 # -----------------------------
-# Utility Functions
+# Utility Function
 # -----------------------------
 def compute_probabilities(values):
     """
-    Computes off-target probabilities and safety percentage
+    Returns off-target probabilities and safety percentage
     """
     D = np.mean(np.abs(values))
     D_norm = D / global_max
@@ -62,15 +63,16 @@ def compute_probabilities(values):
 # -----------------------------
 def landing_page():
     return html.Div(style={'fontFamily':'Arial','padding':'20px'}, children=[
+        # Header
         html.Header([
             html.Div("☰", style={'float':'left', 'fontSize':'24px', 'cursor':'pointer'}),  # Hamburger placeholder
             html.Div("CRISPR-GPT", style={'textAlign':'center', 'fontSize':'24px'}),
             html.Div("🔍", style={'float':'right', 'fontSize':'24px', 'cursor':'pointer'})  # Search placeholder
         ], style={'overflow':'auto', 'padding':'10px', 'borderBottom':'1px solid #ccc'}),
-        
+
         html.Br(),
 
-        # Introduction paragraph
+        # Introduction
         html.P(
             "CRISPR-GPT is a prototype platform demonstrating the simulation of "
             "off-target effects in gene transgenesis. This low-scale simulation "
@@ -82,11 +84,10 @@ def landing_page():
         html.H2("Off-Target Effects Probabilities", style={'marginTop':'30px'}),
 
         # Gene links
-        # -------------
-html.Ul([
-    html.Li(dcc.Link("A2M", href="/a2m", style={'textDecoration':'none', 'fontSize':'18px'})),
-    html.Li(dcc.Link("ABCB1", href="/abcb1", style={'textDecoration':'none', 'fontSize':'18px'}))
-])
+        html.Ul([
+            html.Li(dcc.Link("A2M", href="/a2m", style={'textDecoration':'none', 'fontSize':'18px'})),
+            html.Li(dcc.Link("ABCB1", href="/abcb1", style={'textDecoration':'none', 'fontSize':'18px'}))
+        ]),
 
         html.Footer("Developed by Kingsuk Singha", style={'marginTop':'50px', 'textAlign':'center'})
     ])
@@ -99,7 +100,7 @@ def gene_page(gene):
     probs, safety = compute_probabilities(values)
     categories = gene_categories[gene]
 
-    # Determine safety color and verdict
+    # Safety color and verdict
     if safety < 30:
         color = "red"
         verdict = "Unsafe"
@@ -111,19 +112,21 @@ def gene_page(gene):
         verdict = "Safe"
 
     return html.Div(style={'fontFamily':'Arial','padding':'20px'}, children=[
-        # Header
+        # Header with Home Link
         html.Header([
-            html.A("🏠 Home", href="/", style={'fontSize':'20px', 'textDecoration':'none'}),
+            dcc.Link("🏠 Home", href="/", style={'fontSize':'20px', 'textDecoration':'none'}),
             html.Div(f"Off-Target Effect of Transgenesis: {gene}", style={'textAlign':'center', 'fontSize':'24px'})
         ], style={'overflow':'auto', 'padding':'10px', 'borderBottom':'1px solid #ccc'}),
 
         html.Br(),
 
-        # Bar graph of off-target probabilities
+        # Bar graph
         dcc.Graph(
             figure=go.Figure(data=[go.Bar(x=categories, y=probs)])
-                    .update_layout(title=f"{gene} Off-Target Probabilities",
-                                   yaxis=dict(title="Probability", range=[0,1]))
+                    .update_layout(
+                        title=f"{gene} Off-Target Probabilities",
+                        yaxis=dict(title="Probability", range=[0,1])
+                    )
         ),
 
         # Safety bar
@@ -168,9 +171,3 @@ def display_page(pathname):
         return gene_page("ABCB1")
     else:
         return landing_page()
-
-# -----------------------------
-# Run Server
-# -----------------------------
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000, debug=True)
