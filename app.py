@@ -45,18 +45,38 @@ def compute_probabilities(values):
     probs = [each]*4 + [neutral]
     return probs, neutral * 100
 
-app.layout = html.Div([
-    dcc.Location(id="url"),
-    html.Div(id="page-content")
+app.layout = html.Div(style={'fontFamily':'Arial','padding':'20px'}, children=[
+    html.Header([
+        html.Div("☰", style={'float':'left', 'fontSize':'24px'}),  # Hamburger
+        html.Div("CRISPR-GPT", style={'textAlign':'center', 'fontSize':'24px'}),
+        html.Div("🔍", style={'float':'right', 'fontSize':'24px'})  # Search icon
+    ], style={'overflow':'auto', 'padding':'10px', 'borderBottom':'1px solid #ccc'}),
+    
+    html.Br(),
+    
+    # Introduction paragraph
+    html.P(
+        "CRISPR-GPT is a prototype platform designed to demonstrate the working "
+        "of predicting off-target effects in gene transgenesis. It is a low-scale "
+        "simulation and does not fully capture real biological complexity."
+    ),
+    
+    # =======================
+    # New Subheading Added
+    # =======================
+    html.H2("Off-Target Effects Probabilities", style={'marginTop':'30px'}),
+    
+    # Gene links
+    html.Ul([
+        html.Li(html.A("A2M", href="/a2m", style={'textDecoration':'none'})),
+        html.Li(html.A("ABCB1", href="/abcb1", style={'textDecoration':'none'}))
+    ]),
+    
+    html.Footer("Developed by Kingsuk Singha", style={'marginTop':'50px', 'textAlign':'center'})
 ])
 
-def landing_page():
-    return html.Div([
-        html.H2("CRISPR-GPT"),
-        dcc.Link("A2M", href="/A2M", style={"display": "block"}),
-        dcc.Link("ABCB1", href="/ABCB1", style={"display": "block"}),
-        html.Div("Developed by Kingsuk Singha")
-    ])
+if __name__ == "__main__":
+    app.run(debug=True)
 
 def gene_page(gene):
     values = A2M_values if gene == "A2M" else ABCB1_values
